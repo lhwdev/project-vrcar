@@ -39,5 +39,10 @@ data class Speed(val speed: Float) : Movement()
 data class Steer(val difference: Float, val amount: Float) : Movement()
 
 
+@Serializable
+sealed class Sense : Packet()
 
+
+@Serializable
+data class CameraInfo(val width: Int, val height: Int, val format: )
 
