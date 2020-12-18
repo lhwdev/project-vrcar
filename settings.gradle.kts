@@ -1,1 +1,1 @@
-include(":app", ":desktop")
+include(":backend", ":json", ":app", ":desktop")

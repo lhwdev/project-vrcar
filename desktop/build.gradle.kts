@@ -26,11 +26,11 @@ kotlin {
 
 compose.desktop {
 	application {
-		mainClass = "com.lhwdev.compose.materialapp.desktop.MainKt"
+		mainClass = "com.lhwdev.compose.vrcar.desktop.MainKt"
 		
 		nativeDistributions {
 			targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Deb)
-			packageName = "KotlinMultiplatformComposeDesktopApplication"
+			packageName = "VrCar Controller"
 		}
 	}
 }

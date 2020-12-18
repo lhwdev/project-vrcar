@@ -23,12 +23,9 @@ kotlin {
 		
 		named("desktopMain") {
 			dependencies {
+				implementation(project(":backend"))
 				implementation(compose.desktop.currentOs)
 			}
 		}
 	}
-}
-
-dependencies {
-//	kotlinCompilerPluginClasspath(files("D:\\LHW\\asm\\app\\new\\com.asmx.core\\dump-ir\\compiler-plugin\\build\\libs\\compiler-plugin.jar"))
 }

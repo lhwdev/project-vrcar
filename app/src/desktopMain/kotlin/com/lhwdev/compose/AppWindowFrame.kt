@@ -13,9 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.lhwdev.compose.desktop.WindowDraggableArea
-import com.lhwdev.compose.materialapp.App
-import com.lhwdev.compose.materialapp.AppRoute
-import com.lhwdev.compose.materialapp.AppRouteInfo
+import com.lhwdev.compose.vrcar.App
+import com.lhwdev.compose.vrcar.AppRouteInfo
 import com.lhwdev.compose.navigation.navigationState
 import com.lhwdev.compose.navigation.popRoute
 import com.lhwdev.compose.ui.HoverTextButton
