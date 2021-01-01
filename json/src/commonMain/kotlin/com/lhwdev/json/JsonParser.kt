@@ -16,6 +16,23 @@ private fun Iterator<JsonToken>.skipGroup(initialDepth: Int = 0) {
 	} while(depth != 0)
 }
 
+private fun Iterator<JsonToken>.skipGroupWithChildrenCount(initialDepth: Int = 0): Int {
+	var depth = initialDepth
+	var children = 0
+	do {
+		val token = next()
+		if(token.type == JsonToken.Type.structural) when(token.text) {
+			"[", "{" -> {
+				if(depth == 1) children++
+				depth++
+			}
+			"]", "}" -> depth--
+		}
+	} while(depth != 0)
+	
+	return children
+}
+
 abstract class JsonParser(val config: JsonConfig, val tokenizer: PeekableCloneableIterator<JsonToken>) {
 	@Suppress("NOTHING_TO_INLINE")
 	@OptIn(ExperimentalContracts::class)
@@ -82,11 +99,13 @@ abstract class JsonParser(val config: JsonConfig, val tokenizer: PeekableCloneab
 	
 	fun readObjectPointed(): JsonObjectParser {
 		val newTokenizer: PeekableCloneableIterator<JsonToken>
+		val count: Int
+		
 		readValue {
 			newTokenizer = PeekableCloneableIterator(tokenizer.cloneHere())
-			tokenizer.skipGroup()
+			count = tokenizer.skipGroupWithChildrenCount()
 		}
-		return JsonObjectParser(config, newTokenizer)
+		return JsonObjectParser(config, newTokenizer).also { it.childrenCount = count }
 	}
 	
 	fun beginArray(): JsonArrayParser {
@@ -112,12 +131,14 @@ abstract class JsonParser(val config: JsonConfig, val tokenizer: PeekableCloneab
 	
 	fun readArrayPointed(): JsonArrayParser {
 		val newTokenizer: PeekableCloneableIterator<JsonToken>
+		val count: Int
+		
 		readValue {
 			newTokenizer =
 				PeekableCloneableIterator(JsonTokenizerCloneable(config, """["가","나","다"]""".cloneableIterator()))
-			tokenizer.skipGroup()
+			count = tokenizer.skipGroupWithChildrenCount()
 		}
-		return JsonArrayParser(config, newTokenizer)
+		return JsonArrayParser(config, newTokenizer).also { it.childrenCount = count }
 	}
 	
 	
@@ -136,6 +157,7 @@ class JsonObjectParser(config: JsonConfig, tokenizer: PeekableCloneableIterator<
 	private var isFirst = true
 	private var isFinished = false
 	private var lastKey = false
+	var childrenCount = -1
 	
 	init {
 		readStructure("{")
@@ -192,6 +214,7 @@ class JsonArrayParser(config: JsonConfig, tokenizer: PeekableCloneableIterator<J
 	constructor(config: JsonConfig, tokenizer: CloneableIterator<JsonToken>) : this(config, PeekableCloneableIterator(tokenizer))
 	
 	private var isFirst = true
+	var childrenCount = -1
 	
 	init {
 		readStructure("[")

@@ -120,7 +120,7 @@ class JsonTokenizer(val config: JsonConfig, data: CharIterator) : Iterator<JsonT
 	
 	private fun nextExact(expect: String) = reader.take(expect.length - 1) == expect.drop(1)
 	
-	private fun readStringLenient(): JsonToken = if(config.isLenient.isAllowed) buildString {
+	private fun readStringLenient(): JsonToken = if(config.noQuote.isAllowed) buildString {
 		for(char in reader) {
 			if(char in "[]{}:,$sWhitespaces") {
 				reader.pushPeek(char)

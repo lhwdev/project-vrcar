@@ -11,13 +11,16 @@ class Test {
 	@OptIn(ExperimentalSerializationApi::class)
 	@Test
 	fun `serialization test`() {
-		val adapter = JsonAdapter(EmptySerializersModule, JsonConfig(prettyPrint = PrettyPrint(), isLenient = ConfigValue.enabled, writeValueWithoutQuote = true))
+		val adapter = JsonAdapter(
+			JsonConfig(prettyPrint = PrettyPrint(), noQuote = ConfigValue.enabled, writeValueWithoutQuote = true),
+			EmptySerializersModule
+		)
 		println(
 			adapter.decodeFromString(
 				Hello.serializer(),
 				adapter.encodeToString(
 					Hello.serializer(),
-					Hello("ho", "hi", Hello("a", "b", null, listOf()), listOf("a", "haha"))
+					Hello(mapOf("1" to "hi", "2" to "ho"))
 				).also {
 					println(it)
 				}
@@ -35,8 +38,5 @@ class Test {
 
 @Serializable
 data class Hello(
-	val hi: String,
-	val b: String,
-	val hello: Hello?,
-	val list: List<String>
+	val map: Map<String, String>
 )

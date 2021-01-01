@@ -79,7 +79,7 @@ abstract class JsonWriter(val config: JsonConfig, val output: CharOutput, val de
 	}
 	
 	fun writeString(value: String) {
-		if(config.isLenient.isEnabled && config.writeValueWithoutQuote && isLenientAvailable(value)) writeValue(value)
+		if(config.noQuote.isEnabled && config.writeValueWithoutQuote && isLenientAvailable(value)) writeValue(value)
 		else writeValue("\"${escape(value, config.keyStringUnicodeEncodeMode)}\"")
 	}
 	
@@ -151,7 +151,7 @@ class JsonObjectWriter(config: JsonConfig, output: CharOutput, depth: Int) : Jso
 		else output.write(config.prettyPrint?.objectComma ?: ",")
 		writeln()
 		
-		if(config.isLenient.isEnabled && isLenientAvailable(key)) output.write(key)
+		if(config.noQuote.isEnabled && isLenientAvailable(key)) output.write(key)
 		else output.write("\"${escape(key, config.keyStringUnicodeEncodeMode)}\"")
 		output.write(config.prettyPrint?.objectPair ?: ":")
 		

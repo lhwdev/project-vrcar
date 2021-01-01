@@ -10,11 +10,12 @@ enum class StringUnicodeEncodeMode { asIs, allInAscii, always }
 
 data class JsonConfig(
 	val isCommentAllowed: ConfigValue = ConfigValue.never,
-	val isLenient: ConfigValue = ConfigValue.never,
+	val noQuote: ConfigValue = ConfigValue.never,
 	val writeValueWithoutQuote: Boolean = false,
 	val prettyPrint: PrettyPrint? = null,
 	val stringUnicodeEncodeMode: StringUnicodeEncodeMode = StringUnicodeEncodeMode.allInAscii,
-	val keyStringUnicodeEncodeMode: StringUnicodeEncodeMode = stringUnicodeEncodeMode
+	val keyStringUnicodeEncodeMode: StringUnicodeEncodeMode = stringUnicodeEncodeMode,
+	val mapAsJsonObject: ConfigValue = ConfigValue.enabled
 )
 
 data class PrettyPrint(

@@ -1,20 +1,24 @@
 package com.lhwdev.json.serialization
 
 import com.lhwdev.json.*
-import kotlinx.serialization.*
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.StringFormat
+import kotlinx.serialization.modules.EmptySerializersModule
 import kotlinx.serialization.modules.SerializersModule
 
 
 @OptIn(ExperimentalSerializationApi::class)
 class JsonAdapter(
-	override val serializersModule: SerializersModule,
-	val config: JsonConfig
+	val config: JsonConfig,
+	override val serializersModule: SerializersModule = EmptySerializersModule
 ) : StringFormat {
 	override fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String): T {
 		val tokenizer = JsonTokenizerCloneable(config, string.cloneableIterator())
 		val parser = JsonAnyParser(config, PeekableCloneableIterator(tokenizer))
 		
-		val decoder = JsonRootDecoder(this, parser)
+		val decoder = JsonAnyDecoder(this, parser)
 		return decoder.decodeSerializableValue(deserializer)
 	}
 	
@@ -26,4 +30,10 @@ class JsonAdapter(
 		encoder.encodeSerializableValue(serializer, value)
 		return output.toString()
 	}
+	
+	fun decoderFromStream(iterator: CloneableCharIterator) =
+		JsonAnyDecoder(this, JsonAnyParser(config, JsonTokenizerCloneable(config, iterator)))
+	
+	fun encoderToStream(output: CharOutput) =
+		JsonAnyEncoder(this, JsonAnyWriter(config, output))
 }

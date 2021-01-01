@@ -18,8 +18,8 @@ fun Reader.asIterator() = object : CloneableCharIterator() {
 			read = last
 			last = -1
 		}
-		val char = last.toChar()
-		if(char.toInt() != last) throw IOException("couldn't read char")
+		val char = read.toChar()
+		if(read != last) throw IOException("couldn't read char")
 		return char
 	}
 	
@@ -29,7 +29,7 @@ fun Reader.asIterator() = object : CloneableCharIterator() {
 	}
 	
 	override val cloneSupported get() = false
-	override fun cloneHere() = error("Not implemeneted")
+	override fun cloneHere() = error("Not implemented")
 }
 
 fun Writer.asCharOutput() = object : CharOutput {

@@ -1,14 +1,14 @@
 buildscript {
-	val composeVersion = System.getenv("COMPOSE_TEMPLATE_COMPOSE_VERSION") ?: "0.1.0-m1-build62"
-	val kotlinVersion = "1.4.10"
+	val composeVersion = "0.3.0-build135"
+	val kotlinVersion = "1.4.21"
 	
 	
 	repositories {
-		// TODO: remove after new build is published
-		mavenLocal()
+		mavenCentral()
 		google()
 		jcenter()
 		maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+		maven("https://jitpack.io")
 	}
 	
 	dependencies {
@@ -20,8 +20,10 @@ buildscript {
 
 allprojects {
 	repositories {
+		mavenCentral()
 		google()
 		jcenter()
 		maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+		maven("https://jitpack.io")
 	}
 }

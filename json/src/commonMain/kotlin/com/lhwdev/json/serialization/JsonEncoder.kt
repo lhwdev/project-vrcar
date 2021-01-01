@@ -2,12 +2,13 @@
 
 package com.lhwdev.json.serialization
 
+import com.lhwdev.json.JsonAnyWriter
 import com.lhwdev.json.JsonArrayWriter
 import com.lhwdev.json.JsonObjectWriter
-import com.lhwdev.json.JsonAnyWriter
 import com.lhwdev.json.JsonWriter
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.descriptors.PolymorphicKind
+import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.StructureKind
 import kotlinx.serialization.encoding.AbstractEncoder
@@ -18,12 +19,17 @@ abstract class JsonEncoder(val adapter: JsonAdapter) : AbstractEncoder() {
 	
 	override val serializersModule = adapter.serializersModule
 	
+	private fun encodeJsonObjectMap(descriptor: SerialDescriptor) = adapter.config.mapAsJsonObject.isEnabled &&
+		descriptor.getElementDescriptor(0).kind == PrimitiveKind.STRING
+	
 	override fun beginStructure(descriptor: SerialDescriptor) = when(descriptor.kind as StructureKind) {
-		StructureKind.CLASS, StructureKind.MAP, StructureKind.OBJECT -> JsonMapEncoder(
+		StructureKind.CLASS, StructureKind.OBJECT -> JsonTreeEncoder(
 			adapter,
 			writer.beginObject(),
 			this
 		)
+		StructureKind.MAP -> if(encodeJsonObjectMap(descriptor)) JsonMapEncoder(adapter, writer.beginObject(), this)
+		else JsonListEncoder(adapter, writer.beginArray(), this)
 		StructureKind.LIST -> JsonListEncoder(adapter, writer.beginArray(), this)
 		is PolymorphicKind -> JsonListEncoder(adapter, writer.beginArray(), this)
 	}
@@ -74,12 +80,33 @@ abstract class JsonEncoder(val adapter: JsonAdapter) : AbstractEncoder() {
 }
 
 
-class JsonMapEncoder(adapter: JsonAdapter, override val writer: JsonObjectWriter, val parent: JsonEncoder?) :
+class JsonTreeEncoder(adapter: JsonAdapter, override val writer: JsonObjectWriter, val parent: JsonEncoder?) :
 	JsonEncoder(adapter) {
 	override fun encodeElement(descriptor: SerialDescriptor, index: Int): Boolean {
 		val key = descriptor.getElementName(index)
 		writer.writeKey(key)
 		return true
+	}
+	
+	override fun endStructure(descriptor: SerialDescriptor) {
+		super.endStructure(descriptor)
+		if(parent == null) writer.end()
+		else parent.writer.endObject(writer)
+	}
+}
+
+class JsonMapEncoder(adapter: JsonAdapter, override val writer: JsonObjectWriter, val parent: JsonEncoder?) :
+	JsonEncoder(adapter) {
+	private var isKey = false
+	
+	override fun encodeElement(descriptor: SerialDescriptor, index: Int): Boolean {
+		isKey = index % 2 == 0
+		return true
+	}
+	
+	override fun encodeString(value: String) {
+		if(isKey) writer.writeKey(value)
+		else super.encodeString(value)
 	}
 	
 	override fun endStructure(descriptor: SerialDescriptor) {
