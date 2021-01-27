@@ -9,9 +9,8 @@ import androidx.compose.runtime.ambientOf
 
 val AmbientScaffoldState = ambientOf<ScaffoldState>()
 
-@Composable
 val scaffoldState
-	get() = AmbientScaffoldState.current
+	@Composable get() = AmbientScaffoldState.current
 
 @OptIn(ExperimentalMaterialApi::class)
 suspend fun ScaffoldState.showSnackbar(

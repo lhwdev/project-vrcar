@@ -22,6 +22,9 @@ kotlin {
 	
 	dependencies("desktopMain") {
 		implementation(project(":client-common"))
+		
+		implementation("com.github.sarxos:webcam-capture:0.3.12")
+		implementation("com.github.sarxos:webcam-capture-driver-ipcam:0.3.12")
 		implementation(compose.desktop.currentOs)
 	}
 }

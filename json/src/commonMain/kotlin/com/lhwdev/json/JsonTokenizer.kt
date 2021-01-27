@@ -50,11 +50,10 @@ class JsonTokenizer(val config: JsonConfig, data: CharIterator) : Iterator<JsonT
 	
 	fun nextWithoutFilter(): JsonToken {
 		val char = reader.nextChar()
-		val hasNext = reader.hasNext()
+		
 		
 		when(char) {
 			'\"' -> return buildString {
-				if(!hasNext) notSymmetry()
 				for(c in reader) {
 					when(c) {
 						'\\' -> {
@@ -87,28 +86,35 @@ class JsonTokenizer(val config: JsonConfig, data: CharIterator) : Iterator<JsonT
 						reader.pushPeek(c)
 						break
 					}
+					append(c)
 				}
 			}.let { JsonToken(it, JsonToken.Type.numberLiteral) }
-			't' -> if(nextExact("true")) return  JsonToken("true", JsonToken.Type.booleanLiteral)
-			'f' -> if(nextExact("false")) return JsonToken("false", JsonToken.Type.booleanLiteral)
-			'n' -> if(nextExact("null")) return JsonToken("null", JsonToken.Type.nullLiteral)
+			't' -> if(peekMatchesExact("true")) return JsonToken("true", JsonToken.Type.booleanLiteral)
+			'f' -> if(peekMatchesExact("false")) return JsonToken("false", JsonToken.Type.booleanLiteral)
+			'n' -> if(peekMatchesExact("null")) return JsonToken("null", JsonToken.Type.nullLiteral)
 			in sWhitespaces -> return JsonToken("$char", JsonToken.Type.whitespace) // do not combine; don't need to
 			'/' -> {
-				val peek = reader.peekOrNull()
+				val peek = reader.nextCharOrNull()
 				return if(config.isCommentAllowed.isAllowed && peek == '/') buildString {
+					append('/')
 					for(c in reader) {
 						if(c in "\r\n") break
 						append(c)
 					}
 				}.let { JsonToken("/$it", JsonToken.Type.comment) }
 				else if(config.isCommentAllowed.isAllowed && peek == '*') buildString {
+					append('*')
 					for(c in reader) {
-						if(c == '*' && reader.peek() == '/') break
+						if(c == '*' && reader.nextChar() == '/') {
+							break
+						}
 						append(c)
 					}
+					append("*/")
 				}.let { JsonToken("/$it", JsonToken.Type.comment) }
 				else {
 					if(peek == null) notSymmetry()
+					reader.pushPeek(peek)
 					reader.pushPeek(char)
 					readStringLenient()
 				}
@@ -118,7 +124,15 @@ class JsonTokenizer(val config: JsonConfig, data: CharIterator) : Iterator<JsonT
 		return readStringLenient()
 	}
 	
-	private fun nextExact(expect: String) = reader.take(expect.length - 1) == expect.drop(1)
+	private fun peekMatchesExact(expect: String): Boolean {
+		// this has a bug, but I can't fix it
+		val taken = reader.take(expect.length - 1)
+		val matches = taken == expect.drop(1)
+		if(!matches) {
+			reader.pushPeek(taken)
+		}
+		return matches
+	}
 	
 	private fun readStringLenient(): JsonToken = if(config.noQuote.isAllowed) buildString {
 		for(char in reader) {

@@ -5,14 +5,44 @@ import com.lhwdev.json.encoderToStream
 import com.lhwdev.json.serialization.JsonAdapter
 import com.lhwdev.util.DisposeScope
 import com.lhwdev.util.invoke
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
 import kotlinx.serialization.KSerializer
-import java.io.Closeable
 import java.io.Reader
 import java.io.Writer
-import kotlin.coroutines.CoroutineContext
 
+
+
+fun wrap(r: Reader, name: String = "") = object : Reader() {
+	override fun read(cbuf: CharArray, off: Int, len: Int): Int {
+		print("read$name ")
+		val value = r.read(cbuf, off, len)
+		println(
+			String(cbuf, off, len) + " " + cbuf.sliceArray(off until off + len).joinToString { it.toInt().toString() })
+		return value
+	}
+	
+	override fun close() {
+		r.close()
+	}
+}
+
+fun wrap(w: Writer, name: String = "") = object : Writer() {
+	override fun close() {
+		w.close()
+	}
+	
+	override fun flush() {
+		w.flush()
+	}
+	
+	override fun write(cbuf: CharArray, off: Int, len: Int) {
+		print("write$name ")
+		w.write(cbuf, off, len)
+		println(
+			String(cbuf, off, len) + " " + cbuf.sliceArray(off until off + len).joinToString { it.toInt().toString() })
+	}
+}
 
 abstract class HandleConnection<T : Any, R : Any>(
 	adapter: JsonAdapter,
@@ -20,7 +50,7 @@ abstract class HandleConnection<T : Any, R : Any>(
 	writer: Writer,
 	requestDataSerializer: KSerializer<T>,
 	responseDataSerializer: KSerializer<R>
-) : Closeable {
+) {
 	private val disposal = DisposeScope()
 	private val decoder = adapter.decoderFromStream(disposal { reader })
 	private val encoder = adapter.encoderToStream(disposal { writer })
@@ -31,15 +61,26 @@ abstract class HandleConnection<T : Any, R : Any>(
 	suspend fun main() {
 		while(currentCoroutineContext().isActive) {
 			val request = decoder.decodeSerializableValue(requestSerializer)
-			if(request.data == null) break // stop connection
-			encoder.encodeSerializableValue(responseSerializer, Response(onHandleInvocation(request.data), request.id))
+			if(request.data == null) {
+				// response to close
+				encoder.encodeSerializableValue(responseSerializer, Response(null, request.id))
+				
+				// stop connection
+				close()
+				return
+			}
+			
+			println("HandleConnection: ${request.data}")
+			
+			val response = Response(onHandleInvocation(request.data), request.id)
+			encoder.encodeSerializableValue(responseSerializer, response)
 		}
 	}
 	
 	
 	protected abstract fun onHandleInvocation(request: T): R?
 	
-	override fun close() {
+	private fun close() {
 		disposal.dispose()
 	}
 }

@@ -131,7 +131,8 @@ abstract class JsonWriter(val config: JsonConfig, val output: CharOutput, val de
 
 // it is good to be safe
 private val sLenientPattern = Regex("([a-zA-Z_$.])([a-zA-Z0-9_$.])*")
-private fun isLenientAvailable(text: String) = sLenientPattern.matches(text)
+private val sPredefined = arrayOf("null", "true", "false")
+private fun isLenientAvailable(text: String) = sLenientPattern.matches(text) && text !in sPredefined
 
 
 class JsonObjectWriter(config: JsonConfig, output: CharOutput, depth: Int) : JsonWriter(config, output, depth) {

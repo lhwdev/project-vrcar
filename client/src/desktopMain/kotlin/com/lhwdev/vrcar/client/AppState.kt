@@ -13,5 +13,4 @@ data class AppState(val composableRoute: ComposableRoute<*, *>, val info: AppRou
 
 val AmbientAppState = ambientOf<AppState>()
 
-@Composable
-val appState get() = AmbientAppState.current
+val appState @Composable get() = AmbientAppState.current

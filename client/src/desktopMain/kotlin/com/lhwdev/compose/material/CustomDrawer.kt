@@ -46,7 +46,7 @@ import kotlin.math.roundToInt
  */
 @Composable
 @OptIn(ExperimentalMaterialApi::class)
-fun ModalDrawerLayout(
+fun CustomModalDrawerLayout(
 	drawerContent: @Composable ColumnScope.() -> Unit,
 	modifier: Modifier = Modifier,
 	drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed),

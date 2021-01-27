@@ -4,9 +4,7 @@ import androidx.compose.desktop.AppWindowAmbient
 import androidx.compose.runtime.Composable
 
 
-@Composable
-val currentAppWindow get() = AppWindowAmbient.current!!
+val currentAppWindow @Composable get() = AppWindowAmbient.current!!
 
-@Composable
-val currentComposeWindow get() = AppWindowAmbient.current!!.window
+val currentComposeWindow @Composable get() = AppWindowAmbient.current!!.window
 

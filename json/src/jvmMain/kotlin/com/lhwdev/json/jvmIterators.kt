@@ -8,24 +8,45 @@ import java.io.Writer
 // note that this implementation does not support concurrency
 fun Reader.asIterator() = object : CloneableCharIterator() {
 	private var last = 0
-	override fun nextChar(): Char {
-		val read: Int
-		if(last < 0) {
-			read = read()
-			last = read
+	private var hasLast = false
+	private var hasNext = true
+	
+	private fun eof(): Nothing = throw IOException("EOF")
+	
+	override fun nextChar() = when {
+		!hasNext -> eof()
+		hasLast -> {
+			hasLast = false
+			last
 		}
-		else {
-			read = last
-			last = -1
+		else -> try {
+			read()
+		} catch(e: IOException) {
+			hasNext = false
+			throw e
 		}
+	}.let { read ->
 		val char = read.toChar()
-		if(read != last) throw IOException("couldn't read char")
-		return char
+		if(char.toInt() != read) eof()
+		char
 	}
 	
-	override fun hasNext(): Boolean {
-		last = read()
-		return last >= 0
+	override fun hasNext() = when {
+		!hasNext -> false
+		hasLast -> {
+			last >= 0
+		}
+		else -> {
+			try {
+				val read = read()
+				hasLast = true
+				last = read
+				read >= 0
+			} catch(e: IOException) {
+				hasLast = false
+				false
+			}
+		}
 	}
 	
 	override val cloneSupported get() = false
@@ -36,9 +57,11 @@ fun Writer.asCharOutput() = object : CharOutput {
 	private val writer = this@asCharOutput
 	override fun write(char: Char) {
 		writer.write(char.toInt())
+		writer.flush()
 	}
 	
 	override fun write(text: CharSequence) {
 		writer.write(text.toString())
+		writer.flush()
 	}
 }

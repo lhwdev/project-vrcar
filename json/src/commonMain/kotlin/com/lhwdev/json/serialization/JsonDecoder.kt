@@ -15,7 +15,7 @@ import kotlinx.serialization.encoding.AbstractDecoder
 import kotlinx.serialization.encoding.CompositeDecoder
 
 
-abstract class JsonDecoder(val adapter: JsonAdapter) : AbstractDecoder() {
+abstract class JsonDecoder(val adapter: JsonAdapter, val parent: JsonDecoder?) : AbstractDecoder() {
 	abstract val parser: JsonParser
 	
 	override val serializersModule = adapter.serializersModule
@@ -63,15 +63,18 @@ abstract class JsonDecoder(val adapter: JsonAdapter) : AbstractDecoder() {
 		}
 	}
 	
-	override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder =
-		when(descriptor.kind as StructureKind) {
-			StructureKind.CLASS, StructureKind.OBJECT -> JsonTreeDecoder(adapter, parser.beginObject(), this)
-			StructureKind.MAP -> if(decodeJsonObjectMap(descriptor))
+	val depth: Int = parent?.let { it.depth + 1 } ?: 0
+	
+	override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder = when(descriptor.kind) {
+		StructureKind.CLASS, StructureKind.OBJECT -> JsonTreeDecoder(adapter, parser.beginObject(), this)
+		StructureKind.MAP ->
+			if(decodeJsonObjectMap(descriptor))
 				JsonMapDecoder(adapter, parser.beginObject(), this)
 			else JsonListDecoder(adapter, parser.beginArray(), this)
-			StructureKind.LIST -> JsonListDecoder(adapter, parser.beginArray(), this)
-			is PolymorphicKind -> JsonListDecoder(adapter, parser.beginArray(), this)
-		}
+		StructureKind.LIST -> JsonListDecoder(adapter, parser.beginArray(), this)
+		is PolymorphicKind -> JsonListDecoder(adapter, parser.beginArray(), this)
+		else -> error("nothing")
+	}
 	
 	// orphan parent in beginStructurePointed: intended
 	fun beginStructurePointed(descriptor: SerialDescriptor): CompositeDecoder = when(descriptor.kind as StructureKind) {
@@ -85,11 +88,13 @@ abstract class JsonDecoder(val adapter: JsonAdapter) : AbstractDecoder() {
 }
 
 
-class JsonTreeDecoder(adapter: JsonAdapter, override val parser: JsonObjectParser, val parent: JsonDecoder?) :
-	JsonDecoder(adapter) {
+class JsonTreeDecoder(adapter: JsonAdapter, override val parser: JsonObjectParser, parent: JsonDecoder?) :
+	JsonDecoder(adapter, parent) {
 	override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
 		val key = parser.readKey()
-		return if(key == null) CompositeDecoder.DECODE_DONE else descriptor.getElementIndex(key)
+		val index = if(key == null) CompositeDecoder.DECODE_DONE else descriptor.getElementIndex(key)
+		if(index == CompositeDecoder.UNKNOWN_NAME) println("Unknown index for element name: $key")
+		return index
 	}
 	
 	override fun endStructure(descriptor: SerialDescriptor) {
@@ -101,8 +106,8 @@ class JsonTreeDecoder(adapter: JsonAdapter, override val parser: JsonObjectParse
 
 // the structure of map is like [key1, value1, key2, value2, ...]
 // calling this requires the type of key to be string.
-class JsonMapDecoder(adapter: JsonAdapter, override val parser: JsonObjectParser, val parent: JsonDecoder?) :
-	JsonDecoder(adapter) {
+class JsonMapDecoder(adapter: JsonAdapter, override val parser: JsonObjectParser, parent: JsonDecoder?) :
+	JsonDecoder(adapter, parent) {
 	var currentIndex = 0
 		private set
 	var lastKey: String? = null
@@ -135,8 +140,8 @@ class JsonMapDecoder(adapter: JsonAdapter, override val parser: JsonObjectParser
 	}
 }
 
-class JsonListDecoder(adapter: JsonAdapter, override val parser: JsonArrayParser, val parent: JsonDecoder?) :
-	JsonDecoder(adapter) {
+class JsonListDecoder(adapter: JsonAdapter, override val parser: JsonArrayParser, parent: JsonDecoder?) :
+	JsonDecoder(adapter, parent) {
 	var currentIndex = 0
 		private set
 	
@@ -152,7 +157,7 @@ class JsonListDecoder(adapter: JsonAdapter, override val parser: JsonArrayParser
 	}
 }
 
-class JsonAnyDecoder(adapter: JsonAdapter, override val parser: JsonAnyParser) : JsonDecoder(adapter) {
+class JsonAnyDecoder(adapter: JsonAdapter, override val parser: JsonAnyParser) : JsonDecoder(adapter, null) {
 	override fun decodeElementIndex(descriptor: SerialDescriptor) =
 		error("cannot decode element index with this type of decoder")
 }

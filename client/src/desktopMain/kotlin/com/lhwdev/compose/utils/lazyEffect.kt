@@ -1,11 +1,16 @@
-package com.lhwdev.compose
+package com.lhwdev.compose.utils
 
 import androidx.compose.runtime.*
 import kotlinx.coroutines.CoroutineScope
 
 
 @Composable
-fun <T> lazyEffect(subject: Any?, initial: () -> T, onError: (() -> T)? = null, init: suspend CoroutineScope.() -> T): T? {
+fun <T> lazyEffect(
+	subject: Any?,
+	initial: () -> T,
+	onError: ((Throwable) -> T)? = null,
+	init: suspend CoroutineScope.() -> T
+): T? {
 	var value: T? by remember { mutableStateOf(initial()) }
 	
 	LaunchedEffect(subject) {
@@ -13,7 +18,7 @@ fun <T> lazyEffect(subject: Any?, initial: () -> T, onError: (() -> T)? = null, 
 			init()
 		} catch(e: Throwable) {
 			if(onError == null) throw e
-			onError()
+			onError(e)
 		}
 	}
 	
@@ -21,7 +26,12 @@ fun <T> lazyEffect(subject: Any?, initial: () -> T, onError: (() -> T)? = null, 
 }
 
 @Composable
-fun <T> lazyEffect(vararg subject: Any?, initial: T, onError: (() -> T)? = null, init: suspend CoroutineScope.() -> T): T? {
+fun <T> lazyEffect(
+	vararg subject: Any?,
+	initial: T,
+	onError: ((Throwable) -> T)? = null,
+	init: suspend CoroutineScope.() -> T
+): T? {
 	var value: T? by remember { mutableStateOf(initial) }
 	
 	LaunchedEffect(*subject) {
@@ -29,7 +39,7 @@ fun <T> lazyEffect(vararg subject: Any?, initial: T, onError: (() -> T)? = null,
 			init()
 		} catch(e: Throwable) {
 			if(onError == null) throw e
-			onError()
+			onError(e)
 		}
 	}
 	

@@ -6,13 +6,13 @@ import kotlin.math.min
 
 
 data class CarMotorPins(
-	val m1: Pin = RaspiBcmPin.GPIO_20,
-	val m2: Pin = RaspiBcmPin.GPIO_21,
-	val pwmA: Pin = RaspiBcmPin.GPIO_26,
+	val m1: Pin = RaspiBcmPin.GPIO_28,
+	val m2: Pin = RaspiBcmPin.GPIO_29,
+	val pwmA: Pin = RaspiBcmPin.GPIO_25,
 	
-	val m3: Pin = RaspiBcmPin.GPIO_06,
-	val m4: Pin = RaspiBcmPin.GPIO_13,
-	val pwmB: Pin = RaspiBcmPin.GPIO_12
+	val m3: Pin = RaspiBcmPin.GPIO_22,
+	val m4: Pin = RaspiBcmPin.GPIO_23,
+	val pwmB: Pin = RaspiBcmPin.GPIO_26
 )
 
 
@@ -68,5 +68,10 @@ class CarMotor(pins: CarMotorPins = CarMotorPins()) {
 		val (aPower, bPower) = calculateOutput(speed, steeringDifference, steeringForward)
 		motorLeft.force = aPower
 		motorRight.force = bPower
+	}
+	
+	fun dispose() {
+		motorLeft.dispose()
+		motorRight.dispose()
 	}
 }

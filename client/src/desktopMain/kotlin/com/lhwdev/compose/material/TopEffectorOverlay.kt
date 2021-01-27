@@ -11,9 +11,8 @@ import androidx.compose.ui.unit.dp
 
 private val TopEffectHeightAmbient = ambientOf { 0.dp }
 
-@Composable
 val topEffectHeight
-	get() = TopEffectHeightAmbient.current
+	@Composable get() = TopEffectHeightAmbient.current
 
 
 @Composable

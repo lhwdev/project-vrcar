@@ -39,17 +39,16 @@ tasks {
 		}
 	}
 	
-	create<JavaExec>("run") {
+	create<DefaultTask>("run") {
 		dependsOn("shadowJar")
 		
 		val jar = File(buildDir, "libs/main.jar")
-		classpath(jar)
 		
 		doLast {
 			ssh.run(delegateClosureOf<RunHandler> {
 				session(remotes.getByName("rpi-remote"), delegateClosureOf<SessionHandler> {
 					put(hashMapOf("from" to jar, "into" to "main.jar"))
-					execute("java -jar main.jar")
+					executeSudo("java -Dpi4j.linking=dynamic -jar main.jar")
 				})
 			})
 		}
@@ -58,11 +57,11 @@ tasks {
 
 remotes {
 	create("rpi-remote") {
+		val properties = Properties()
+		properties.load(rootProject.file("local.properties").reader())
+		
 		user = "pi"
-		host = "172.30.1.19"
-		password = with(Properties()) {
-			load(rootProject.file("local.properties").reader())
-			getProperty("sshPassword")
-		}
+		host = properties.getProperty("sshHost")
+		password = properties.getProperty("sshPassword")
 	}
 }

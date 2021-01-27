@@ -2,6 +2,7 @@ package com.lhwdev.vrcar.client
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.onCommit
+import androidx.compose.runtime.remember
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeysSet
 import com.lhwdev.compose.ui.desktop.currentAppWindow
@@ -19,10 +20,25 @@ private val sShortcuts = mapOf<KeysSet, (AppState, NavigationState) -> Unit>(
 actual fun ShortcutRoot(appState: AppState, navigationState: NavigationState, content: @Composable () -> Unit) {
 	// this supposes that a shortcut with the same key does not exist in advance
 	val window = currentAppWindow
+	val shortcuts = appState.info.windowHint?.shortcuts
 	
-	onCommit(navigationState, window) {
-		sShortcuts.entries.forEach { (key, shortcut) ->
-			window.keyboard.setShortcut(key) { shortcut(appState, navigationState) }
+	// val merged = remember(shortcuts) { sShortcuts + shortcuts } // I will make shortcuts not conflict
+	
+	onCommit(shortcuts) {
+		if(shortcuts != null) {
+			shortcuts.forEach { (key, action) ->
+				window.keyboard.setShortcut(key, action)
+			}
+			
+			onDispose {
+				shortcuts.keys.forEach { window.keyboard.removeShortcut(it) }
+			}
+		}
+	}
+	
+	onCommit(window) {
+		sShortcuts.forEach { (key, action) ->
+			window.keyboard.setShortcut(key) { action(appState, navigationState) }
 		}
 		
 		onDispose {

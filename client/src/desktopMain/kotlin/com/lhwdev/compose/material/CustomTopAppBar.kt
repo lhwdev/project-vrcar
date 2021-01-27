@@ -45,7 +45,6 @@ fun CustomTopAppBar(
 	elevation: Dp = TopAppBarElevation
 ) {
 	AppBar(topEffect, backgroundColor, contentColor, elevation, RectangleShape, modifier) {
-		val emphasisLevels = AmbientEmphasisLevels.current
 		if (navigationIcon == null) {
 			Spacer(TitleInsetWithoutIcon)
 		} else {

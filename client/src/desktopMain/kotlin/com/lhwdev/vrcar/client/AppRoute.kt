@@ -2,12 +2,14 @@ package com.lhwdev.vrcar.client
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.input.key.KeysSet
 import androidx.compose.ui.unit.IntSize
 import com.lhwdev.compose.navigation.AbstractRouteId
 import com.lhwdev.compose.navigation.ComposableRoute
 import com.lhwdev.compose.navigation.ComposableRouteId
 import com.lhwdev.compose.navigation.RouteId
 import com.lhwdev.utils.Mergeable
+import com.lhwdev.utils.merge
 
 
 @Immutable
@@ -29,11 +31,13 @@ data class AppRouteInfo(
 
 enum class AppUiState(val appBarVisible: Boolean) { normal(appBarVisible = true), noAppBar(appBarVisible = false) }
 
-data class WindowHint(val size: IntSize? = null) : Mergeable<WindowHint> {
-	
-	
+data class WindowHint(
+	val size: IntSize? = null,
+	val shortcuts: Map<KeysSet, () -> Unit>? = null
+) : Mergeable<WindowHint> {
 	override fun merge(other: WindowHint) = WindowHint(
-		size = other.size ?: size
+		size = other.size ?: size,
+		shortcuts = other.shortcuts ?: shortcuts // merge(other.shortcuts, shortcuts) { a, b -> a + b }: do not merge
 	)
 }
 

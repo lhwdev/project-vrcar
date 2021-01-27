@@ -3,6 +3,7 @@ package com.lhwdev.json
 
 fun CharIterator.take(n: Int) = buildString {
 	for(i in 0 until n) {
+		if(!hasNext()) break
 		append(nextChar())
 	}
 }
@@ -10,25 +11,23 @@ fun CharIterator.take(n: Int) = buildString {
 
 fun mutableCharListOf() = mutableListOf<Char>() // TODO
 
-fun PeekableCharIterator.peekOrNull() = if(hasNext()) peek() else null
+fun PeekableCharIterator.nextCharOrNull() = if(hasNext()) nextChar() else null
 
 class PeekableCharIterator(private val original: CharIterator) : CharIterator() {
 	private val peekList = mutableCharListOf()
 	
 	val allPeeks: List<Char> get() = peekList
 	
+	
 	fun pushPeek(peek: Char) {
 		peekList += peek
 	}
 	
-	override fun hasNext() = peekList.isNotEmpty() || original.hasNext()
-	
-	// values peeked several times are identical (unless nextChar() is not called)
-	fun peek(): Char {
-		val peek = original.nextChar()
-		pushPeek(peek)
-		return peek
+	fun pushPeek(text: CharSequence) {
+		for(c in text) peekList += c
 	}
+	
+	override fun hasNext() = peekList.isNotEmpty() || original.hasNext()
 	
 	override fun nextChar() = if(peekList.isNotEmpty()) {
 		peekList.removeAt(0)

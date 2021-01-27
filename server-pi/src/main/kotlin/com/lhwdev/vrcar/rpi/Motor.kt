@@ -1,16 +1,24 @@
 package com.lhwdev.vrcar.rpi
 
 import com.pi4j.io.gpio.Pin
+import com.pi4j.io.gpio.PinState
 import mhashim6.pi4k.digitalOutput
+import mhashim6.pi4k.pwmOutput
 import mhashim6.pi4k.softPwmOutput
 import kotlin.math.abs
 
 
 
 class Motor(first: Pin, second: Pin, enable: Pin) {
-	private val firstOut = softPwmOutput(first)
-	private val secondOut = softPwmOutput(second)
-	private val enable = digitalOutput(enable)
+	private val firstOut = anyPwmOutput(first)
+	private val secondOut = anyPwmOutput(second)
+	private val enable = digitalOutput(enable, state = PinState.HIGH)
+	
+	
+	init {
+		firstOut.pwm = 0
+		secondOut.pwm = 0
+	}
 	
 	
 	/**
@@ -24,17 +32,24 @@ class Motor(first: Pin, second: Pin, enable: Pin) {
 	
 	fun update() {
 		when(force) {
-			0f -> enable.low()
+			0f -> {
+				firstOut.pwm = 0
+				secondOut.pwm = 0
+			}
 			in 0f..1f -> {
 				firstOut.pwm = (force * 100).toInt() // 0..100
 				secondOut.pwm = 0
-				enable.high()
 			}
 			in -1f..0f -> {
 				firstOut.pwm = 0
-				secondOut.pwm = (abs(force) * 100).toInt()
-				enable.high()
+				secondOut.pwm = (-force * 100).toInt()
 			}
 		}
+		
+	}
+	
+	
+	fun dispose() {
+		enable.low()
 	}
 }

@@ -1,5 +1,5 @@
 buildscript {
-	val composeVersion = "0.3.0-build135"
+	val composeVersion = "0.3.0-build139"  /*"0.0.0-unmerged-build21"*/ // SwingPanel, used to 0.3.0-build139
 	val kotlinVersion = "1.4.21"
 	
 	

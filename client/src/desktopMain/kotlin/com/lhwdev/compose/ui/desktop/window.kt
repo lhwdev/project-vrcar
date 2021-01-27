@@ -6,6 +6,8 @@ import androidx.compose.runtime.ambientOf
 
 val IsWindowDocked = ambientOf<Boolean>()
 
-@Composable
-val isWindowDocked
-    get() = IsWindowDocked.current
+val isWindowDocked @Composable get() = IsWindowDocked.current
+
+val HasResized = ambientOf<Boolean>()
+
+val hasResized @Composable get() = HasResized.current

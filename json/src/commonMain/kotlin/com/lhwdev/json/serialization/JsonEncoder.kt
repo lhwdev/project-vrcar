@@ -22,16 +22,18 @@ abstract class JsonEncoder(val adapter: JsonAdapter) : AbstractEncoder() {
 	private fun encodeJsonObjectMap(descriptor: SerialDescriptor) = adapter.config.mapAsJsonObject.isEnabled &&
 		descriptor.getElementDescriptor(0).kind == PrimitiveKind.STRING
 	
-	override fun beginStructure(descriptor: SerialDescriptor) = when(descriptor.kind as StructureKind) {
+	override fun beginStructure(descriptor: SerialDescriptor) = when(descriptor.kind) {
 		StructureKind.CLASS, StructureKind.OBJECT -> JsonTreeEncoder(
 			adapter,
 			writer.beginObject(),
 			this
 		)
-		StructureKind.MAP -> if(encodeJsonObjectMap(descriptor)) JsonMapEncoder(adapter, writer.beginObject(), this)
-		else JsonListEncoder(adapter, writer.beginArray(), this)
+		StructureKind.MAP ->
+			if(encodeJsonObjectMap(descriptor)) JsonMapEncoder(adapter, writer.beginObject(), this)
+			else JsonListEncoder(adapter, writer.beginArray(), this)
 		StructureKind.LIST -> JsonListEncoder(adapter, writer.beginArray(), this)
 		is PolymorphicKind -> JsonListEncoder(adapter, writer.beginArray(), this)
+		else -> error("nothing")
 	}
 	
 	override fun encodeBoolean(value: Boolean) {

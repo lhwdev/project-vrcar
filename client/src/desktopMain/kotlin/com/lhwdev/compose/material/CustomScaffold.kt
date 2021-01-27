@@ -66,7 +66,7 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 @OptIn(ExperimentalMaterialApi::class)
-fun Scaffold(
+fun CustomScaffold(
 	modifier: Modifier = Modifier,
 	scaffoldState: ScaffoldState = rememberScaffoldState(),
 	topBar: @Composable () -> Unit = emptyContent(),

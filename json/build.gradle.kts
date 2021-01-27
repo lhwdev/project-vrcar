@@ -13,6 +13,8 @@ kotlin {
 	setupCommon()
 	
 	dependencies {
+		implementation(project(":util"))
+		
 		implementation(coroutinesCore)
 		implementation(serializationCore)
 		implementation(serializationJson)

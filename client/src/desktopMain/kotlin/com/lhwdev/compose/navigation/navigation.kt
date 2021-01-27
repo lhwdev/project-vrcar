@@ -20,11 +20,10 @@ data class NavigationState(val routes: SnapshotStateList<Route<*>>)
 
 private val sNavigationAmbient = ambientOf<NavigationState>()
 
-@Composable
-val navigationState get() = sNavigationAmbient.current
+val navigationState @Composable get() = sNavigationAmbient.current
 
-@Composable
-val currentRoute get() = navigationState.routes.last()
+val currentRoute
+	@Composable get() = navigationState.routes.last()
 
 @Composable
 inline fun <reified T> currentRoute() = navigationState.routes.lastInstanceOf<T>()

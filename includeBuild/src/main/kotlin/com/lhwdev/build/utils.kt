@@ -46,22 +46,32 @@ fun KotlinProjectExtension.setupCommon() {
 fun KotlinMultiplatformExtension.setupJvm(name: String = "jvm", configure: (KotlinJvmTarget.() -> Unit)? = null) {
 	jvm(name) {
 		configure?.invoke(this)
-	}
-	
-	sourceSets {
-		named("${name}Test") {
-			dependencies {
-				implementation(kotlin("test-junit"))
-			}
+		
+		
+		compilations.all {
+			kotlinOptions.jvmTarget = "1.8"
 		}
 	}
+	
+	setupJvmCommon(name)
 }
 
 fun KotlinJvmProjectExtension.setup() {
 	setupCommon()
+	setupJvmCommon(null)
 	
 	target.compilations.all {
 		kotlinOptions.jvmTarget = "1.8"
+	}
+}
+
+private fun KotlinProjectExtension.setupJvmCommon(name: String?) {
+	sourceSets {
+		named(if(name == null) "test" else "${name}Test") {
+			dependencies {
+				implementation(kotlin("test-junit"))
+			}
+		}
 	}
 }
 
