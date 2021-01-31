@@ -1,6 +1,5 @@
 package com.lhwdev.compose.navigation
 
-import androidx.compose.desktop.AppManager
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.lhwdev.lastInstanceOf
@@ -18,9 +17,9 @@ import com.lhwdev.lastInstanceOf
 data class NavigationState(val routes: SnapshotStateList<Route<*>>)
 
 
-private val sNavigationAmbient = ambientOf<NavigationState>()
+private val AmbientNavigation = ambientOf<NavigationState>()
 
-val navigationState @Composable get() = sNavigationAmbient.current
+val navigationState @Composable get() = AmbientNavigation.current
 
 val currentRoute
 	@Composable get() = navigationState.routes.last()
@@ -96,15 +95,13 @@ fun NavigationState.findRouteIndex(route: Route<*>): Int {
 
 fun NavigationState.hasRoute(route: Route<*>) = findRouteIndex(route) != -1
 
-fun quitApplication() {
-	AppManager.exit()
-}
+expect fun quitApplication()
 
 
 @Composable
 fun NavigationRoot(rootRoute: Route<*>, content: @Composable (NavigationState) -> Unit) {
 	val state = remember(rootRoute) { NavigationState(routes = mutableStateListOf(rootRoute)) }
-	Providers(sNavigationAmbient provides state) {
+	Providers(AmbientNavigation provides state) {
 		content(state)
 	}
 }

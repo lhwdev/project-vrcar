@@ -35,16 +35,16 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun CustomTopAppBar(
+	modifier: Modifier = Modifier,
 	title: @Composable () -> Unit,
 	topEffect: @Composable () -> Unit = emptyContent(),
-	modifier: Modifier = Modifier,
 	navigationIcon: @Composable (() -> Unit)? = null,
 	actions: @Composable RowScope.() -> Unit = {},
 	backgroundColor: Color = MaterialTheme.colors.primarySurface,
 	contentColor: Color = contentColorFor(backgroundColor),
 	elevation: Dp = TopAppBarElevation
 ) {
-	AppBar(topEffect, backgroundColor, contentColor, elevation, RectangleShape, modifier) {
+	AppBar(modifier, topEffect, backgroundColor, contentColor, elevation, RectangleShape) {
 		if (navigationIcon == null) {
 			Spacer(TitleInsetWithoutIcon)
 		} else {
@@ -91,20 +91,20 @@ fun CustomTopAppBar(
  */
 @Composable
 fun CustomTopAppBar(
-	topEffect: @Composable () -> Unit = emptyContent(),
 	modifier: Modifier = Modifier,
+	topEffect: @Composable () -> Unit = emptyContent(),
 	backgroundColor: Color = MaterialTheme.colors.primarySurface,
 	contentColor: Color = contentColorFor(backgroundColor),
 	elevation: Dp = TopAppBarElevation,
 	content: @Composable RowScope.() -> Unit
 ) {
 	AppBar(
+		modifier,
 		topEffect,
 		backgroundColor,
 		contentColor,
 		elevation,
 		RectangleShape,
-		modifier = modifier,
 		children = content
 	)
 }
@@ -117,12 +117,12 @@ fun CustomTopAppBar(
  */
 @Composable
 private fun AppBar(
+	modifier: Modifier = Modifier,
 	topEffect: @Composable () -> Unit = emptyContent(),
 	backgroundColor: Color,
 	contentColor: Color,
 	elevation: Dp,
 	shape: Shape,
-	modifier: Modifier = Modifier,
 	children: @Composable RowScope.() -> Unit
 ) {
 	Surface(

@@ -70,6 +70,9 @@ suspend fun accept(motor: CarMotor, client: Socket) = withContext(Dispatchers.IO
 					motor.steeringDifference = request.difference
 					motor.steeringForward = request.forward
 				}
+				is RawMotor -> {
+					motor.updateForce(request.left, request.right)
+				}
 			}
 			
 			return null

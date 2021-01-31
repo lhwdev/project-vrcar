@@ -1,15 +1,13 @@
 package com.lhwdev.vrcar
 
-import com.github.sarxos.webcam.ds.ipcam.IpCamDeviceRegistry
-import com.github.sarxos.webcam.ds.ipcam.IpCamMode
 import kotlinx.coroutines.Dispatchers
 import java.net.Socket
 import kotlin.random.Random
 
 
 // kinda like json rpc
-class Controller(host: String, carPort: Int, camPort: Int) {
-	private val cameraName = "vrCarCam" + hashCode() + "," + Random.nextLong()
+class Controller(val host: String, carPort: Int, val camPort: Int) {
+	val cameraName = "vrCarCam" + hashCode() + "," + Random.nextLong()
 	private val socket = Socket(host, carPort)
 	
 	val invokeConnection = InvokeConnection(
@@ -21,15 +19,21 @@ class Controller(host: String, carPort: Int, camPort: Int) {
 		Dispatchers.IO
 	)
 	
-	val camera = IpCamDeviceRegistry.register(cameraName, "http://$host:$camPort/camera/mjpeg", IpCamMode.PUSH)
+	val cameraUrl get() = "http://$host:$camPort/camera/mjpeg"
+	
+	
+	private suspend fun invokeItem(packet: Packet): Packet? {
+		println(packet)
+		return invokeConnection(packet)
+	}
 	
 	
 	suspend fun connect() {
-		check(invokeConnection(HelloPacket) == HelloPacket)
+		check(invokeItem(HelloPacket) == HelloPacket)
 	}
 	
 	suspend fun speed(speed: Float) {
-		invokeConnection(Speed(speed))
+		invokeItem(Speed(speed))
 	}
 	
 	suspend fun stop() {
@@ -37,14 +41,16 @@ class Controller(host: String, carPort: Int, camPort: Int) {
 	}
 	
 	suspend fun steer(difference: Float, forward: Float = 0f) {
-		invokeConnection(Steer(difference, forward))
+		invokeItem(Steer(difference, forward))
+	}
+	
+	suspend fun raw(left: Float, right: Float) {
+		invokeItem(RawMotor(left, right))
 	}
 	
 	// suspend fun sp
 	
 	suspend fun close() {
 		invokeConnection.close()
-		camera.close()
-		IpCamDeviceRegistry.unregister(cameraName)
 	}
 }

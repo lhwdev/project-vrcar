@@ -2,11 +2,15 @@ package com.lhwdev.build
 
 import org.gradle.api.GradleException
 import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.invoke
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
+import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl
 import org.jetbrains.kotlin.gradle.targets.jvm.KotlinJvmTarget
 
@@ -43,17 +47,38 @@ fun KotlinProjectExtension.setupCommon() {
 	}
 }
 
-fun KotlinMultiplatformExtension.setupJvm(name: String = "jvm", configure: (KotlinJvmTarget.() -> Unit)? = null) {
-	jvm(name) {
+fun KotlinMultiplatformExtension.setupJvm(
+	name: String = "jvm",
+	dependsOn: Set<KotlinTarget> = emptySet(),
+	configure: (KotlinJvmTarget.() -> Unit)? = null
+): KotlinJvmTarget {
+	val target = jvm(name) {
 		configure?.invoke(this)
-		
 		
 		compilations.all {
 			kotlinOptions.jvmTarget = "1.8"
 		}
 	}
 	
-	setupJvmCommon(name)
+	setupJvmCommon(name, dependsOn)
+	return target
+}
+
+fun KotlinMultiplatformExtension.setupAndroid(
+	name: String = "android",
+	dependsOn: Set<KotlinTarget> = emptySet(),
+	configure: (KotlinAndroidTarget.() -> Unit)? = null
+): KotlinAndroidTarget {
+	val target = android(name) {
+		configure?.invoke(this)
+		
+		compilations.all {
+			kotlinOptions.jvmTarget = "1.8"
+		}
+	}
+	
+	setupJvmCommon(name, dependsOn)
+	return target
 }
 
 fun KotlinJvmProjectExtension.setup() {
@@ -65,9 +90,24 @@ fun KotlinJvmProjectExtension.setup() {
 	}
 }
 
-private fun KotlinProjectExtension.setupJvmCommon(name: String?) {
+fun KotlinAndroidProjectExtension.setupAndroid() {
+	setupCommon()
+	setupJvmCommon(null)
+	
+	target.compilations.all {
+		kotlinOptions.jvmTarget = "1.8"
+	}
+}
+
+private fun KotlinProjectExtension.setupJvmCommon(name: String?, dependsOn: Set<KotlinTarget> = emptySet()) {
 	sourceSets {
-		named(if(name == null) "test" else "${name}Test") {
+		getByName(if(name == null) "main" else "${name}Main") {
+			dependsOn.forEach { dependsOn(sourceSets.getByName(if(it.name.isEmpty()) "main" else "${it.name}Main")) }
+		}
+		
+		getByName(if(name == null) "test" else "${name}Test") {
+			dependsOn.forEach { dependsOn(sourceSets.getByName(if(it.name.isEmpty()) "test" else "${it.name}Test")) }
+			
 			dependencies {
 				implementation(kotlin("test-junit"))
 			}

@@ -66,8 +66,12 @@ class CarMotor(pins: CarMotorPins = CarMotorPins()) {
 	
 	fun update() {
 		val (aPower, bPower) = calculateOutput(speed, steeringDifference, steeringForward)
-		motorLeft.force = aPower
-		motorRight.force = bPower
+		updateForce(aPower, bPower)
+	}
+	
+	fun updateForce(left: Float, right: Float) {
+		motorLeft.force = left
+		motorRight.force = right
 	}
 	
 	fun dispose() {

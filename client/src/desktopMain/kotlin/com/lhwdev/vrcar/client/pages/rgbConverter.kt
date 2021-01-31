@@ -1,12 +1,14 @@
 package com.lhwdev.vrcar.client.pages
 
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import org.jetbrains.skija.Bitmap
 import org.jetbrains.skija.ColorAlphaType
 import org.jetbrains.skija.ColorType
 import org.jetbrains.skija.ImageInfo
 
 
-fun convertBgr888ToRgba8888Bitmap(originalArray: ByteArray, width: Int, height: Int): Bitmap {
+actual fun convertBgr888ToRgba8888Bitmap(originalArray: ByteArray, width: Int, height: Int): ImageBitmap {
 	val transformedArray = ByteArray(originalArray.size * 4 / 3)
 	for(i in 0 until originalArray.size / 3) {
 		val originalIndex = i * 3
@@ -26,5 +28,5 @@ fun convertBgr888ToRgba8888Bitmap(originalArray: ByteArray, width: Int, height: 
 		)
 	)
 	bitmap.installPixels(bitmap.imageInfo, transformedArray, width * 4L)
-	return bitmap
+	return bitmap.asImageBitmap()
 }

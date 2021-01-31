@@ -7,7 +7,7 @@ import com.lhwdev.compose.ui.desktop.hasResized
 
 
 @Composable
-actual fun provideWindowHint(hint: WindowHint) {
+actual fun ProvideWindowHint(hint: WindowHint) {
 	val window = currentAppWindow
 	
 	if(isChanged(hint)) {

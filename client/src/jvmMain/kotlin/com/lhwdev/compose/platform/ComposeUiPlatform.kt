@@ -1,7 +1,6 @@
 package com.lhwdev.compose.platform
 
 import androidx.compose.runtime.Composable
-import com.lhwdev.compose.ui.desktop.TopAppFrame
 import com.lhwdev.vrcar.client.AppRouteInfo
 
 
@@ -14,9 +13,8 @@ val isMobile get() = ComposeUiPlatform.platformType == PlatformType.mobile
 
 val isWeb get() = ComposeUiPlatform.platformType == PlatformType.web
 
-object ComposeUiPlatform {
-	val platformType = PlatformType.desktop
-	fun topEffect(info: AppRouteInfo) =
-		@Composable { TopAppFrame(info) }
+expect object ComposeUiPlatform {
+	val platformType: PlatformType
+	fun topEffect(info: AppRouteInfo): @Composable () -> Unit
 }
 

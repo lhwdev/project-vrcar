@@ -9,10 +9,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 
-private val TopEffectHeightAmbient = ambientOf { 0.dp }
+private val AmbientTopEffectHeight = ambientOf { 0.dp }
 
 val topEffectHeight
-	@Composable get() = TopEffectHeightAmbient.current
+	@Composable get() = AmbientTopEffectHeight.current
 
 
 @Composable
@@ -36,7 +36,7 @@ fun TopEffectorOverlay(
 			val bodyContentPlaceables = subcompose(false) {
 				with(AmbientDensity.current) {
 					val height = topEffectHeight.toDp()
-					Providers(TopEffectHeightAmbient provides height) {
+					Providers(AmbientTopEffectHeight provides height) {
 						bodyContent(height)
 					}
 				}

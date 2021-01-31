@@ -30,7 +30,7 @@ private class DragHandler : DragObserver {
 	private lateinit var window: AppFrame
 	
 	override fun onStart(downPosition: Offset) {
-		if(!this::window.isInitialized) {
+		if(!::window.isInitialized) {
 			window = AppManager.focusedWindow!!
 		}
 		location = Offset(

@@ -1,16 +1,17 @@
 package com.lhwdev.vrcar.client
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Providers
-import androidx.compose.runtime.onCommit
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.KeysSet
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.lhwdev.compose.AmbientScaffoldState
@@ -19,7 +20,6 @@ import com.lhwdev.compose.material.TopEffectorOverlay
 import com.lhwdev.compose.navigation.*
 import com.lhwdev.compose.platform.ComposeUiPlatform
 import com.lhwdev.compose.platform.isMobile
-import com.lhwdev.compose.ui.desktop.currentAppWindow
 import com.lhwdev.foldMerged
 import com.lhwdev.lastInstanceOf
 import com.lhwdev.vrcar.client.pages.HomeRoute
@@ -49,7 +49,7 @@ fun App() {
 		}
 		
 		val appState = AppState(composableRoute = route, info = info, drawerOpenRoute = drawerOpenRoute)
-		info.windowHint?.let { provideWindowHint(it) }
+		info.windowHint?.let { ProvideWindowHint(it) }
 		
 		Providers(AmbientAppState provides appState, AmbientScaffoldState provides scaffoldState) {
 			ShortcutRoot(appState, state) {
@@ -60,21 +60,10 @@ fun App() {
 }
 
 @Composable
-expect fun provideWindowHint(hint: WindowHint)
+expect fun ProvideWindowHint(hint: WindowHint)
 
 @Composable
 expect fun ShortcutRoot(appState: AppState, navigationState: NavigationState, content: @Composable () -> Unit)
-
-@Composable
-fun addShortcut(set: KeysSet, callback: () -> Unit) {
-	val window = currentAppWindow
-	
-	onCommit(set) {
-		window.keyboard.setShortcut(set, callback)
-		
-		onDispose { window.keyboard.removeShortcut(set) }
-	}
-}
 
 
 @Composable

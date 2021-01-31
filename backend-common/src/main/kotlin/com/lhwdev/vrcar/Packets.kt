@@ -45,6 +45,9 @@ data class Speed(val speed: Float) : Movement()
 @Serializable
 data class Steer(val difference: Float, val forward: Float) : Movement()
 
+@Serializable
+data class RawMotor(val left: Float, val right: Float) : Movement()
+
 
 @Serializable
 sealed class Sense : Packet()

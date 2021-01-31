@@ -1,3 +1,11 @@
-include(":util", ":backend-common", ":json", ":client-common", ":client", "server-common", "server-pi", "server-pc-stub")
+include(":util")
+include(":backend-common")
+include(":json")
+include(":client-common")
+include(":client")
+include(":client-android")
+include("server-common")
+include("server-pi")
+include("server-pc-stub")
 
 includeBuild("includeBuild")

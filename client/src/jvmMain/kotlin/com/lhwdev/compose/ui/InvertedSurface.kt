@@ -9,8 +9,8 @@ import com.lhwdev.vrcar.client.darken
 
 @Composable
 fun AlteredSurface(
-	color: Color = MaterialTheme.colors.primarySurface,
 	modifier: Modifier = Modifier,
+	color: Color = MaterialTheme.colors.primarySurface,
 	content: @Composable () -> Unit
 ) {
 	if(color == MaterialTheme.colors.surface)
